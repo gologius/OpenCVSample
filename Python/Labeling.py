@@ -24,3 +24,4 @@ print "contours ", contours
 print "Gravity of Centers ", GoCs
 cv2.imshow("img", img)
 cv2.waitKey(-1)
+cv2.imwrite("labeling.png",img)
