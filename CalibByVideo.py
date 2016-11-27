@@ -29,7 +29,6 @@ def calcObjPoints():
 
 #ユーザーによる決定
 def decideLoop(debug = True):
-    
     if not debug:
         return True
     
@@ -97,16 +96,22 @@ print rms
 print K 
 print dist 
 
+#debug
 for (i, img) in enumerate(useImgs):
     
-    #描画
+    w_points = np.array( [(0.0, 0.0, 0.0), (1000.0, 0.0, 0.0), (0.0, 1000.0, 0.0), (1000.0, 1000.0, 0.0)] ) #世界座標
+    i_points, jac = cv2.projectPoints(w_points, r[i], t[i], K, dist) #画像座標
+    i_points = i_points.reshape(len(i_points),2)    
     
-    origin = cv2.projectPoints((0.,0.,0.), r[i], t[i], K, dist)
-
-    cv2.circle(img, origin, 4)
-
+    #描画
+    for p in i_points:
+        print "chink", i_points
+        print "unko", p
+        x, y = p
+        cv2.circle(img, (int(x),int(y)), 1, (255,255,0), 4)
+        
     cv2.imshow("debug", img)                
-    key = cv2.waitKey(1)
+    key = cv2.waitKey(-1)
     if key == ord("q"):
         break
 
