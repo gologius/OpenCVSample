@@ -90,7 +90,9 @@ for i in xrange(frameNum):
 video.release()
 cv2.destroyAllWindows()
 
+print "start calibration"
 rms, K, dist, r, t = cv2.calibrateCamera(objPoints, imgPoints, (imgShape[1],imgShape[0]), None, None, flags=cv2.CALIB_USE_INTRINSIC_GUESS) #+@で内部パラメータの初期値を設定できる
+print "finish calibration"
 
 print rms
 print K 
@@ -103,14 +105,13 @@ for (i, img) in enumerate(useImgs):
     i_points, jac = cv2.projectPoints(w_points, r[i], t[i], K, dist) #画像座標
     i_points = i_points.reshape(len(i_points),2)    
     
+    undist_img = cv2.undistort(img, K, dist)     
     #描画
     for p in i_points:
-        print "chink", i_points
-        print "unko", p
         x, y = p
-        cv2.circle(img, (int(x),int(y)), 1, (255,255,0), 4)
+        cv2.circle(undist_img, (int(x),int(y)), 1, (255,255,0), 4)
         
-    cv2.imshow("debug", img)                
+    cv2.imshow("debug", undist_img)                
     key = cv2.waitKey(-1)
     if key == ord("q"):
         break
