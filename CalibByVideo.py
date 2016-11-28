@@ -20,9 +20,9 @@ PATTERN_FLOAT = 12.0 #板の厚み分 mm
 def calcObjPoints():
     
     results = []
-    for x in xrange(PATTERN_SHAPE[0]):
-        for y in xrange(PATTERN_SHAPE[1]):
-            results.append((x*PATTERN_SIZE,y*PATTERN_SIZE, 12.0))
+    for y in xrange(PATTERN_SHAPE[1]):
+        for x in xrange(PATTERN_SHAPE[0]):
+            results.append((x*PATTERN_SIZE,y*PATTERN_SIZE, PATTERN_FLOAT))
             
     results = np.array(results, dtype=np.float32).reshape((PATTERN_SHAPE[0]*PATTERN_SHAPE[1], 1, 3))
     return results
@@ -67,18 +67,19 @@ for i in xrange(frameNum):
         imgShape = img.shape
     
     work = np.array(img) #コピー
-    useImgs.append(work)
     found, corners = cv2.findCirclesGrid(img, PATTERN_SHAPE, flags=cv2.CALIB_CB_SYMMETRIC_GRID +cv2.CALIB_CB_CLUSTERING)
     if found:
         #検出結果を見て採用するかを決定
         cv2.drawChessboardCorners(work, PATTERN_SHAPE, corners, found)
         cv2.imshow("img", work)
-        ok = decideLoop(False)
+        ok = decideLoop(True)
         if ok:
             print "success"
             #保存
             imgPoints.append(corners)
             objPoints.append(precalcPoints)
+            useImgs.append(work)
+    
     else:
         print "failed"
         cv2.imshow("img", work)
@@ -104,13 +105,19 @@ for (i, img) in enumerate(useImgs):
     w_points = np.array( [(0.0, 0.0, 0.0), (1000.0, 0.0, 0.0), (0.0, 1000.0, 0.0), (1000.0, 1000.0, 0.0)] ) #世界座標
     i_points, jac = cv2.projectPoints(w_points, r[i], t[i], K, dist) #画像座標
     i_points = i_points.reshape(len(i_points),2)    
-    
+    i_points = i_points * -1.0
     undist_img = cv2.undistort(img, K, dist)     
+   
     #描画
     for p in i_points:
         x, y = p
         cv2.circle(undist_img, (int(x),int(y)), 1, (255,255,0), 4)
-        
+    cv2.line(undist_img,(int(i_points[0,0]),int(i_points[0,1])),(int(i_points[1,0]),int(i_points[1,1])), (255,0,255), 1)
+    cv2.line(undist_img,(int(i_points[0,0]),int(i_points[0,1])),(int(i_points[2,0]),int(i_points[2,1])), (255,0,255), 1)
+    cv2.line(undist_img,(int(i_points[0,0]),int(i_points[0,1])),(int(i_points[3,0]),int(i_points[3,1])), (255,0,255), 1)        
+    print i_points[0]    
+    
+    cv2.imshow("src", img)
     cv2.imshow("debug", undist_img)                
     key = cv2.waitKey(-1)
     if key == ord("q"):
