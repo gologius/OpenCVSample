@@ -72,9 +72,12 @@ for i in xrange(frameNum):
         #検出結果を見て採用するかを決定
         cv2.drawChessboardCorners(work, PATTERN_SHAPE, corners, found)
         cv2.imshow("img", work)
+        
+        print len(corners)
+        print corners
         ok = decideLoop(True)
         if ok:
-            print "success"
+            print "success "
             #保存
             imgPoints.append(corners)
             objPoints.append(precalcPoints)
@@ -117,7 +120,6 @@ for (i, img) in enumerate(useImgs):
     cv2.line(undist_img,(int(i_points[0,0]),int(i_points[0,1])),(int(i_points[3,0]),int(i_points[3,1])), (255,0,255), 1)        
     print i_points[0]    
     
-    cv2.imshow("src", img)
     cv2.imshow("debug", undist_img)                
     key = cv2.waitKey(-1)
     if key == ord("q"):
