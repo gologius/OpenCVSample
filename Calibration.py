@@ -102,6 +102,12 @@ print rms
 print K 
 print dist 
 
+#結果保存
+np.save("inParams", K)
+np.save("distParams", dist)
+np.save("R_s", r)
+np.save("t_s", t)
+
 #debug
 for (i, img) in enumerate(useImgs):
     
@@ -126,5 +132,3 @@ for (i, img) in enumerate(useImgs):
         break
 
 cv2.destroyAllWindows()
-
-#結果保存
