@@ -2,7 +2,7 @@
 """
 Created on Sun Nov 27 22:34:31 2016
 
-@author: Koji
+@author: gologius
 """
 
 # -*- coding: utf-8 -*-
