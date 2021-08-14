@@ -10,8 +10,8 @@ Created on Sun Nov 27 22:34:31 2016
 import numpy as np
 import cv2
 
-VIDEO_FILENAME = "input\\video.MP4"
-STEP = 50 #動画からフレームを抽出する間隔
+VIDEO_FILENAME = r"C:\Users\Koji\Desktop\chinpo.avi"
+STEP = 1 #動画からフレームを抽出する間隔
 PATTERN_SHAPE = (4,5) #circle gridのCircle個数
 PATTERN_SIZE = 200 #Circleの中心間隔 mm
 PATTERN_FLOAT = 12.0 #板の厚み分 mm
@@ -45,7 +45,7 @@ def decideLoop(debug = True):
         
     return decision
 
-def drawAxis(imgs, K, dist):
+def drawAxis(imgs, K, dist, r, t):
     for (i, img) in enumerate(imgs):
         
         w_points = np.array( [(0.0, 0.0, 0.0), (1000.0, 0.0, 0.0), (0.0, 1000.0, 0.0), (1000.0, 1000.0, 0.0)] ) #世界座標
@@ -74,11 +74,6 @@ def drawAxis(imgs, K, dist):
 
 #####################################################################################################################
 
-objPoints = [] #世界座標
-imgPoints = [] #画像座標
-useImgs = []
-precalcPoints = calcObjPoints() #世界座標は変わらないので予め計算しておく
-
 def calibByVideo(filename):
     
     #ビデオ読み込み
@@ -90,6 +85,12 @@ def calibByVideo(filename):
     imgShape = (0,0) #後で使用
     print "frame num ", frameNum , " fps ", fps 
     
+    #結果格納用変数
+    objPoints = [] #世界座標
+    imgPoints = [] #画像座標
+    useImgs = []
+    precalcPoints = calcObjPoints() #世界座標は変わらないので予め計算しておく    
+    
     #画像解析ループ
     for i in xrange(frameNum):
         ret, img = video.read()
@@ -99,14 +100,12 @@ def calibByVideo(filename):
             imgShape = img.shape
         
         work = np.array(img) #コピー
-        found, corners = cv2.findCirclesGrid(img, PATTERN_SHAPE, flags=cv2.CALIB_CB_SYMMETRIC_GRID +cv2.CALIB_CB_CLUSTERING)
+        found, corners = cv2.findCirclesGrid(img, PATTERN_SHAPE, flags=cv2.CALIB_CB_ASYMMETRIC_GRID + cv2.CALIB_CB_CLUSTERING)
         if found:
             #検出結果を見て採用するかを決定
             cv2.drawChessboardCorners(work, PATTERN_SHAPE, corners, found)
             cv2.imshow("img", work)
             
-            print len(corners)
-            print corners
             ok = decideLoop(True)
             if ok:
                 print "success "
@@ -126,6 +125,10 @@ def calibByVideo(filename):
     video.release()
     cv2.destroyAllWindows()
     
+    if len(useImgs) < 2 :
+        print "too little num of img"
+        return 
+    
     print "start calibration"
     rms, K, dist, r, t = cv2.calibrateCamera(objPoints, imgPoints, (imgShape[1],imgShape[0]), None, None, flags=cv2.CALIB_USE_INTRINSIC_GUESS) #+@で内部パラメータの初期値を設定できる
     print "finish calibration"
@@ -142,3 +145,4 @@ def calibByVideo(filename):
     
     return
 
+calibByVideo(VIDEO_FILENAME)
